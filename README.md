@@ -6,6 +6,7 @@ castle that makes you go hmm
 
 - `conda env create -f environment.yml`
 - `conda activate thinky-castle`
+- `python main.py`
 - Make a `MapLayer` with `m = MapLayer(n)`.
   - `m` then contains `n` x `n` `Node` (those are the squares from the original game).
 - Add walls between two nodes with `m.add_wall(a: Square, b: Square)`.
