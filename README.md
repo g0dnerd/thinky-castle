@@ -6,9 +6,10 @@ castle that makes you go hmm
 
 - `conda env create -f environment.yml`
 - `conda activate thinky-castle`
-- Make `MapLayer`s with `m = MapLayer(n)`.
-  - `m` then contains `n` x `n` `Node`s (which the squares from the original game).
-- Add walls between squares with `m.add_wall(a, b)`.
-  - `a` and `b` are `Square`s, which are used to index into a `MapLayer`s `Node`s so we don't have to pass around x and y coords a billion times
+- Make a `MapLayer` with `m = MapLayer(n)`.
+  - `m` then contains `n` x `n` `Node` (those are the squares from the original game).
+- Add walls between two nodes with `m.add_wall(a: Square, b: Square)`.
+  - We use `Square` to index into `MapLayer.nodes` so we don't have to pass around x and y coords a billion times
     - `Square(4, 3)` corresponds to e4, `Square(0,0)` to a1.
-- `Node`s might want to contain stuff at some point, though they currently are too stupid to do so.
+  - there's probably a much smarter graph-like implementation of this but I'm lazy and dumb
+- A `Node` might want to contain stuff at some point, though it is too stupid to do so.
