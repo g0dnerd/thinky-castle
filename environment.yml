@@ -1,0 +1,6 @@
+name: thinky-castle
+channels:
+  - defaults
+dependencies:
+  - python
+  - numpy
