@@ -71,7 +71,7 @@ class MapLayer:
         for x in range(self.size):
             for y in range(self.size):
                 node = self.get_node(Square(x, y))
-                assert node
+                assert node, "Went out of bounds in string repr of map layer"
                 for direction in Direction:
                     dx = direction.value[0]
                     dy = direction.value[1]
