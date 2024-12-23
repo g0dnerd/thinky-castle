@@ -50,8 +50,12 @@ class Node:
         self.connected_nodes[dir] = target
 
     def is_accessible(self, dir):
-        """Returns true if there is a connected node in the specified direction."""
-        return dir in self.connected_nodes
+        """If there is a connected node in the specified direction,
+        returns it and false otherwise.
+        """
+        if dir in self.connected_nodes:
+            return self.connected_nodes[dir]
+        return False
 
 
 class MapLayer:
