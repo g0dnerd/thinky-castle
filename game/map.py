@@ -3,6 +3,8 @@ from typing import Dict, Optional
 
 
 class Direction(Enum):
+    """Movement directions in the lateral plane"""
+
     UP = (-1, 0)
     RIGHT = (0, 1)
     DOWN = (1, 0)
@@ -44,9 +46,11 @@ class Node:
         self.connected_nodes: Dict[Direction, "Node"] = {}
 
     def connect(self, dir: Direction, target: "Node"):
+        """Adds the target node as the connected node in the specified direction."""
         self.connected_nodes[dir] = target
 
     def is_accessible(self, dir):
+        """Returns true if there is a connected node in the specified direction."""
         return dir in self.connected_nodes
 
 
@@ -98,11 +102,15 @@ class MapLayer:
                     break
 
     def get_node(self, s: Square) -> Optional[Node]:
+        """Returns the node at the specified square in this layer if it exists
+        and None otherwise.
+        """
         if 0 <= s.x < self.size and 0 <= s.y < self.size:
             return self.nodes[s.x][s.y]
         return None
 
     def __str__(self) -> str:
+        """The most cursed string representation known to man"""
         ret = "  "
         for i in range(self.size):
             ret += chr(ord("A") + i) + "   "
