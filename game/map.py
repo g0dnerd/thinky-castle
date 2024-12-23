@@ -37,7 +37,7 @@ class Square:
 class Node:
     """A node represents one square on a map layer.
     A node can contain things like traps or ladders.
-    Nodes contain information about which other nodes they share a wall with.
+    Nodes contain information about which other nodes they are connected to.
     """
 
     def __init__(self, pos: Square):
@@ -74,17 +74,6 @@ class MapLayer:
                     neighbor = self.get_node(Square(x + dx, y + dy))
                     if neighbor:
                         node.connect(direction, neighbor)
-
-    def _validate_square(self, s: Square):
-        """Ensures a square is within map bounds."""
-        if not (0 <= s.x < self.size and 0 <= s.y < self.size):
-            raise ValueError(f"Square {str(s)} is out of bounds.")
-
-    def _validate_adjacent(self, a: Square, b: Square):
-        """Ensures a and b are adjacent."""
-        # Adjacent squares can only either be one x or one y value apart.
-        if abs(a.x - b.x) + abs(a.y - b.y) != 1:
-            raise ValueError(f"Squares {str(a)} and {str(b)} are not adjacent.")
 
     def add_wall(self, a: Square, b: Square):
         """Adds a wall between two nodes."""
