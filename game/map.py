@@ -1,4 +1,12 @@
-from typing import Set
+from enum import Enum
+from typing import Dict, Optional
+
+
+class Direction(Enum):
+    UP = (-1, 0)
+    RIGHT = (0, 1)
+    DOWN = (1, 0)
+    LEFT = (0, -1)
 
 
 class Square:
@@ -24,12 +32,44 @@ class Square:
         return hash((self.x, self.y))
 
 
+class Node:
+    """A node represents one square on a map layer.
+    A node can contain things like traps or ladders.
+    Nodes contain information about which other nodes they share a wall with.
+    """
+
+    def __init__(self, pos: Square):
+        self.pos = pos
+        self.contents = None
+        self.connected_nodes: Dict[Direction, "Node"] = {}
+
+    def connect(self, dir: Direction, target: "Node"):
+        self.connected_nodes[dir] = target
+
+    def is_accessible(self, dir):
+        return dir in self.connected_nodes
+
+
 class MapLayer:
     def __init__(self, size: int):
         """Creates a new square map layer of size x."""
         self.size = size
         # Initialize a two-dimensional array of empty nodes
-        self.nodes = [[Node() for _ in range(size)] for _ in range(size)]
+        self.nodes = [[Node(Square(x, y)) for y in range(size)] for x in range(size)]
+        self.connect_nodes()
+
+    def connect_nodes(self):
+        """Automatically connects adjacent nodes."""
+        for x in range(self.size):
+            for y in range(self.size):
+                node = self.get_node(Square(x, y))
+                assert node
+                for direction in Direction:
+                    dx = direction.value[0]
+                    dy = direction.value[1]
+                    neighbor = self.get_node(Square(x + dx, y + dy))
+                    if neighbor:
+                        node.connect(direction, neighbor)
 
     def _validate_square(self, s: Square):
         """Ensures a square is within map bounds."""
@@ -43,12 +83,24 @@ class MapLayer:
             raise ValueError(f"Squares {str(a)} and {str(b)} are not adjacent.")
 
     def add_wall(self, a: Square, b: Square):
-        """Adds a wall between squares a and b."""
-        self._validate_square(a)
-        self._validate_square(b)
-        self._validate_adjacent(a, b)
-        self.nodes[a.y][a.x].walls.add(b)
-        self.nodes[b.y][b.x].walls.add(a)
+        """Adds a wall between two nodes."""
+        node1 = self.get_node(a)
+        node2 = self.get_node(b)
+        if node1 and node2:
+            # Remove connectivity in both directions
+            for direction, node in node1.connected_nodes.items():
+                if node == node2:
+                    del node1.connected_nodes[direction]
+                    break
+            for direction, node in node2.connected_nodes.items():
+                if node == node1:
+                    del node2.connected_nodes[direction]
+                    break
+
+    def get_node(self, s: Square) -> Optional[Node]:
+        if 0 <= s.x < self.size and 0 <= s.y < self.size:
+            return self.nodes[s.x][s.y]
+        return None
 
     def __str__(self) -> str:
         ret = "  "
@@ -61,21 +113,12 @@ class MapLayer:
             h_walls = "  "
             for x, node in enumerate(row):
                 ret += "o" if not node.contents else str(node.contents)
-                ret += " | " if Square(x + 1, y) in node.walls else "   "
-                h_walls += "-   " if Square(x, y + 1) in node.walls else "    "
+                if x < self.size - 1:
+                    ret += "   " if node.is_accessible(Direction.RIGHT) else " | "
+                if y < self.size - 1:
+                    h_walls += "    " if node.is_accessible(Direction.DOWN) else "-   "
 
             ret += "\n"
             ret += h_walls
             ret += "\n"
         return ret
-
-
-class Node:
-    """A node represents one square on a map layer.
-    A node can contain things like traps or ladders.
-    Nodes contain information about which other nodes they share a wall with.
-    """
-
-    def __init__(self, contents=None):
-        self.contents = contents
-        self.walls: Set[Square] = set()
