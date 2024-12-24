@@ -60,8 +60,6 @@ class Node:
         self.pos = pos
         self.prop = None
         self.connected_nodes: Dict[Direction, "Node"] = {}
-        # self.has_ladder_slot = False
-        # self.has_trapdoor_slot = False
 
     def connect(self, dir: Direction, target: "Node"):
         """Adds the target node as the connected node in the specified direction."""
@@ -71,9 +69,11 @@ class Node:
         """If there is a connected node in the specified direction,
         returns it and false otherwise.
         """
-        if dir in self.connected_nodes:
-            return self.connected_nodes[dir]
-        return False
+        try:
+            node = self.connected_nodes[dir]
+            return node
+        except KeyError:
+            return False
 
     def add_prop(self, prop: Prop):
         if not self.prop:
@@ -131,7 +131,7 @@ class MapLayer:
 
     def add_prop(self, s: Square, p: Prop):
         node = self.get_node(s)
-        assert node, f"Could not find node on square {str(s)} to add prop to"
+        assert node, f"Could not find node on square {s} to add prop to"
 
         node.add_prop(p)
 
@@ -158,5 +158,36 @@ class MapLayer:
                         "    " if node.is_accessible(Direction.DOWN) else "-   "
                     )
             repr += f"\n{horizontal_walls}\n"
+
+        return repr
+
+
+class Map:
+    """Holds any number of vertically arranged map layers."""
+
+    def __init__(self, size=Optional[int]):
+        self.layers: Dict[int, MapLayer] = {}
+        self.size = size
+
+    def add_layer(self, layer: MapLayer, elevation: int):
+        if isinstance(self.size, int) and elevation >= self.size:
+            raise IndexError(
+                f"Could not add layer to bounded level of size {self.size} at elevation {elevation}"
+            )
+        else:
+            self.layers[elevation] = layer
+
+    def get_layer(self, elevation: int) -> Optional[MapLayer]:
+        try:
+            layer = self.layers[elevation]
+            return layer
+        except KeyError:
+            return None
+
+    def __str__(self) -> str:
+        repr = ""
+        for e, layer in self.layers.items():
+            repr += f"Elevation {e}:\n"
+            repr += str(layer)
 
         return repr

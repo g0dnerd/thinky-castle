@@ -1,23 +1,28 @@
-from game.map import MapLayer, Square
+from game import map
 from game.props import Ladder
 
 
 def main():
-    ml = MapLayer(5)
-    print(str(ml))
+    lvl = map.Map()
+    ml = map.MapLayer(5)
+    lvl.add_layer(ml, 1)
+    print(lvl)
+
+    layer = lvl.get_layer(1)
+    assert layer
 
     print("Adding a wall between E4 and E5.")
-    ml.add_wall(Square.from_name("E4"), Square.from_name("E5"))
-    print(str(ml))
+    layer.add_wall(map.Square.from_name("E4"), map.Square.from_name("E5"))
+    print(lvl)
 
     print("Adding a wall between E4 and D4.")
-    ml.add_wall(Square.from_name("E4"), Square.from_name("D4"))
-    print(str(ml))
+    layer.add_wall(map.Square.from_name("E4"), map.Square.from_name("D4"))
+    print(lvl)
 
     print("Adding a ladder on A2.")
     ladder = Ladder()
-    ml.add_prop(Square.from_name("A2"), ladder)
-    print(ml)
+    layer.add_prop(map.Square.from_name("A2"), ladder)
+    print(lvl)
 
 
 if __name__ == "__main__":

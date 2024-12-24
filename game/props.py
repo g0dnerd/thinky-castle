@@ -1,6 +1,6 @@
 class Prop:
-    def __init__(self):
-        self.visible = True
+    def __init__(self, visible=True):
+        self.visible = visible
 
 
 class Ladder(Prop):
