@@ -103,13 +103,13 @@ class MapLayer:
         node2 = self.get_node(b)
         if node1 and node2:
             # Remove connectivity in both directions
-            for dir, node in node1.connected_nodes.items():
+            for direction, node in node1.connected_nodes.items():
                 if node == node2:
-                    del node1.connected_nodes[dir]
+                    del node1.connected_nodes[direction]
                     break
-            for dir, node in node2.connected_nodes.items():
+            for direction, node in node2.connected_nodes.items():
                 if node == node1:
-                    del node2.connected_nodes[dir]
+                    del node2.connected_nodes[direction]
                     break
 
     def get_node(self, s: Square) -> Optional[Node]:
