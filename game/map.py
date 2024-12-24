@@ -20,6 +20,19 @@ class Square:
         self.x = x
         self.y = y
 
+    @classmethod
+    def from_name(cls, n: str):
+        """Parses a square descriptor like 'A4' into x and y coords."""
+        assert len(n) == 2, "Invalid square name"
+        name = n.upper()
+        rank_idx = ord(name[0]) - ord("A")
+        file_idx = int(name[1]) - 1
+
+        assert 0 < rank_idx <= 10, f"Rank {n[0]} is out of bounds."
+        assert 0 < file_idx <= 10, f"File {n[1]} is out of bounds."
+
+        return cls(rank_idx, file_idx)
+
     def __str__(self) -> str:
         return f"{chr(ord('A') + self.x)}{1 + self.y}"
 

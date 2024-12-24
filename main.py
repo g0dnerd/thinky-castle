@@ -6,11 +6,11 @@ def main():
     print(str(ml))
 
     print("Adding a wall between E4 and E5.")
-    ml.add_wall(Square(3, 4), Square(4, 4))
+    ml.add_wall(Square.from_name("E4"), Square.from_name("E5"))
     print(str(ml))
 
     print("Adding a wall between E4 and D4.")
-    ml.add_wall(Square(3, 4), Square(3, 3))
+    ml.add_wall(Square.from_name("E4"), Square.from_name("D4"))
     print(str(ml))
 
 
