@@ -4,7 +4,7 @@ from game.props import Ladder
 
 def main():
     lvl = map.Level()
-    ml = map.MapLayer(5)
+    ml = map.Layer(5)
     lvl.add_layer(ml, 1)
     print(lvl)
 

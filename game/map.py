@@ -80,7 +80,7 @@ class Node:
             self.prop = prop
 
 
-class MapLayer:
+class Layer:
     def __init__(self, size: int):
         """Creates a new square map layer of size x."""
         self.size = size
@@ -169,10 +169,10 @@ class Level:
         """Initializes a map with layers stored in a dictionary[elevation, MapLayer].
         You can optionally specify a maximum size for this level.
         """
-        self.layers: Dict[int, MapLayer] = {}
+        self.layers: Dict[int, Layer] = {}
         self.size = size
 
-    def add_layer(self, layer: MapLayer, elevation: int):
+    def add_layer(self, layer: Layer, elevation: int):
         if isinstance(self.size, int) and elevation >= self.size:
             raise IndexError(
                 f"Could not add layer to bounded level of size {self.size} at elevation {elevation}"
@@ -180,7 +180,7 @@ class Level:
         else:
             self.layers[elevation] = layer
 
-    def get_layer(self, elevation: int) -> Optional[MapLayer]:
+    def get_layer(self, elevation: int) -> Optional[Layer]:
         try:
             layer = self.layers[elevation]
             return layer
