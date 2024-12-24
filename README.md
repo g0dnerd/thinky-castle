@@ -10,10 +10,10 @@ castle that makes you go hmm
 
 ## Classes
 
-- A `Level` can hold one or more `MapLayer`s. These are vertically arranged.
+- A `Level` holds one or more layers (`game.map.Layer`). These are vertically arranged.
   - A `Level` can be restricted or open in size
-- `MapLayer(n)` creates a `MapLayer` with `n` x `n` `Node`s (the squares from the original game).
-- Add walls between two `Node`s with `m.add_wall(a: Square, b: Square)`.
+- `Layer(n)` creates a `MapLayer` with `n` x `n` nodes (`game.map.Node`) (the squares from the original game).
+- Add walls between two nodes with `m.add_wall(a: Square, b: Square)`.
   - `Square(4, 3)` corresponds to e4, `Square(0,0)` to a1.
-- A `Node` can contain zero or one `Prop`s like a `Ladder` that takes the player one `MapLayer` further up.
+- A `Node` can contain zero or one props (`game.props.Prop`) like a `Ladder` that takes the player one `MapLayer` further up.
 - A `Player` is currently technically an existent class.
