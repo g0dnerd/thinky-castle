@@ -103,13 +103,13 @@ class MapLayer:
         node2 = self.get_node(b)
         if node1 and node2:
             # Remove connectivity in both directions
-            for direction, node in node1.connected_nodes.items():
+            for dir, node in node1.connected_nodes.items():
                 if node == node2:
-                    del node1.connected_nodes[direction]
+                    del node1.connected_nodes[dir]
                     break
-            for direction, node in node2.connected_nodes.items():
+            for dir, node in node2.connected_nodes.items():
                 if node == node1:
-                    del node2.connected_nodes[direction]
+                    del node2.connected_nodes[dir]
                     break
 
     def get_node(self, s: Square) -> Optional[Node]:
@@ -123,22 +123,26 @@ class MapLayer:
 
     def __str__(self) -> str:
         """The most cursed string representation known to man"""
-        ret = "  "
+        repr = "  "
+
+        # Add file indices
         for i in range(self.size):
-            ret += chr(ord("A") + i) + "   "
-        ret += "\n"
+            repr += chr(ord("A") + i) + "   "
+        repr += "\n"
 
         for y, row in enumerate(self.nodes):
-            ret += f"{y+1} "
-            h_walls = "  "
-            for x, node in enumerate(row):
-                ret += "o" if not node.contents else str(node.contents)
-                if x < self.size - 1:
-                    ret += "   " if node.is_accessible(Direction.RIGHT) else " | "
-                if y < self.size - 1:
-                    h_walls += "    " if node.is_accessible(Direction.DOWN) else "-   "
+            # Add rank indices
+            repr += f"{y+1} "
+            horizontal_walls = "  "
 
-            ret += "\n"
-            ret += h_walls
-            ret += "\n"
-        return ret
+            for x, node in enumerate(row):
+                repr += "o" if not node.contents else str(node.contents)
+                if x < self.size - 1:
+                    repr += "   " if node.is_accessible(Direction.RIGHT) else " | "
+                if y < self.size - 1:
+                    horizontal_walls += (
+                        "    " if node.is_accessible(Direction.DOWN) else "-   "
+                    )
+
+            repr += f"\n{horizontal_walls}\n"
+        return repr
