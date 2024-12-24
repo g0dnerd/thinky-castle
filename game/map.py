@@ -24,8 +24,9 @@ class Square:
     def from_name(cls, n: str):
         """Parses a square descriptor like 'A4' into x and y coords."""
         assert len(n) == 2, "Invalid square name"
+
         name = n.upper()
-        rank_idx = ord(name[0]) - ord("A")
+        rank_idx = ord(name[0]) - ord("A")  # A = 0, B = 1, C = 2, etc.
         file_idx = int(name[1]) - 1
 
         assert 0 < rank_idx <= 10, f"Rank {n[0]} is out of bounds."
@@ -84,13 +85,17 @@ class MapLayer:
         for x in range(self.size):
             for y in range(self.size):
                 node = self.get_node(Square(x, y))
-                assert node, "Went out of bounds in string repr of map layer"
-                for direction in Direction:
-                    dx = direction.value[0]
-                    dy = direction.value[1]
+                assert node, f"Expected node in map layer at {x}, {y}, but got None."
+
+                for dir in Direction:
+                    dx = dir.value[0]
+                    dy = dir.value[1]
+
+                    # Try to get the node in the given direction
                     neighbor = self.get_node(Square(x + dx, y + dy))
                     if neighbor:
-                        node.connect(direction, neighbor)
+                        # If one exists, connect it to the current node.
+                        node.connect(dir, neighbor)
 
     def add_wall(self, a: Square, b: Square):
         """Adds a wall between two nodes."""
@@ -98,13 +103,13 @@ class MapLayer:
         node2 = self.get_node(b)
         if node1 and node2:
             # Remove connectivity in both directions
-            for direction, node in node1.connected_nodes.items():
+            for dir, node in node1.connected_nodes.items():
                 if node == node2:
-                    del node1.connected_nodes[direction]
+                    del node1.connected_nodes[dir]
                     break
-            for direction, node in node2.connected_nodes.items():
+            for dir, node in node2.connected_nodes.items():
                 if node == node1:
-                    del node2.connected_nodes[direction]
+                    del node2.connected_nodes[dir]
                     break
 
     def get_node(self, s: Square) -> Optional[Node]:
@@ -113,6 +118,7 @@ class MapLayer:
         """
         if 0 <= s.x < self.size and 0 <= s.y < self.size:
             return self.nodes[s.x][s.y]
+
         return None
 
     def __str__(self) -> str:
