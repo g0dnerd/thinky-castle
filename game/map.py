@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Dict, Optional
 
+from game.props import Prop
+
 
 class Direction(Enum):
     """Movement directions in the lateral plane"""
@@ -26,11 +28,11 @@ class Square:
         assert len(n) == 2, "Invalid square name"
 
         name = n.upper()
-        rank_idx = ord(name[0]) - ord("A")  # A = 0, B = 1, C = 2, etc.
-        file_idx = int(name[1]) - 1
+        file_idx = ord(name[0]) - ord("A")  # A = 0, B = 1, C = 2, etc.
+        rank_idx = int(name[1]) - 1
 
-        assert 0 < rank_idx <= 10, f"Rank {n[0]} is out of bounds."
-        assert 0 < file_idx <= 10, f"File {n[1]} is out of bounds."
+        assert 0 <= rank_idx <= 10, f"Rank {n[0]} is out of bounds."
+        assert 0 <= file_idx <= 10, f"File {n[1]} is out of bounds."
 
         return cls(rank_idx, file_idx)
 
@@ -56,8 +58,10 @@ class Node:
 
     def __init__(self, pos: Square):
         self.pos = pos
-        self.contents = None
+        self.prop = None
         self.connected_nodes: Dict[Direction, "Node"] = {}
+        # self.has_ladder_slot = False
+        # self.has_trapdoor_slot = False
 
     def connect(self, dir: Direction, target: "Node"):
         """Adds the target node as the connected node in the specified direction."""
@@ -70,6 +74,10 @@ class Node:
         if dir in self.connected_nodes:
             return self.connected_nodes[dir]
         return False
+
+    def add_prop(self, prop: Prop):
+        if not self.prop:
+            self.prop = prop
 
 
 class MapLayer:
@@ -121,6 +129,12 @@ class MapLayer:
 
         return None
 
+    def add_prop(self, s: Square, p: Prop):
+        node = self.get_node(s)
+        assert node, f"Could not find node on square {str(s)} to add prop to"
+
+        node.add_prop(p)
+
     def __str__(self) -> str:
         """The most cursed string representation known to man"""
         repr = "  "
@@ -136,13 +150,13 @@ class MapLayer:
             horizontal_walls = "  "
 
             for x, node in enumerate(row):
-                repr += "o" if not node.contents else str(node.contents)
+                repr += "o" if not node.prop else str(node.prop)
                 if x < self.size - 1:
                     repr += "   " if node.is_accessible(Direction.RIGHT) else " | "
                 if y < self.size - 1:
                     horizontal_walls += (
                         "    " if node.is_accessible(Direction.DOWN) else "-   "
                     )
-
             repr += f"\n{horizontal_walls}\n"
+
         return repr
