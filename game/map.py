@@ -162,10 +162,13 @@ class MapLayer:
         return repr
 
 
-class Map:
+class Level:
     """Holds any number of vertically arranged map layers."""
 
     def __init__(self, size=Optional[int]):
+        """Initializes a map with layers stored in a dictionary[elevation, MapLayer].
+        You can optionally specify a maximum size for this level.
+        """
         self.layers: Dict[int, MapLayer] = {}
         self.size = size
 
