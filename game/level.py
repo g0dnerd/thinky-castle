@@ -5,7 +5,7 @@ from game.props import Prop
 
 
 class Direction(Enum):
-    """Movement directions in the lateral plane"""
+    """Movement directions in x/z space"""
 
     UP = (0, -1)
     DOWN = (0, 1)
@@ -15,7 +15,7 @@ class Direction(Enum):
 
 class Square:
     """Represents a node index in x/y space.
-    A1 is (0, 0), E5 is (4, 4).
+    A1 is (0, 0), A2 is (0, 1), E5 is (4, 4).
     """
 
     def __init__(self, x: int, y: int):
@@ -62,34 +62,33 @@ class Node:
         self.connected_nodes: Dict[Direction, "Node"] = {}
 
     def connect(self, dir: Direction, target: "Node"):
-        """Adds the target node as the connected node in the specified direction."""
+        """Adds the target node as the connected node for the specified direction."""
         self.connected_nodes[dir] = target
 
     def is_accessible(self, dir):
         """If there is a connected node in the specified direction,
         returns it and false otherwise.
         """
-        try:
-            node = self.connected_nodes[dir]
-            return node
-        except KeyError:
-            return False
+        return self.connected_nodes.get(dir, False)
 
     def add_prop(self, prop: Prop):
         if not self.prop:
             self.prop = prop
+        else:
+            raise ValueError("Can't add prop to occupied node.")
 
 
 class Layer:
     def __init__(self, size: int):
         """Creates a new square map layer of size x."""
         self.size = size
-        # Initialize a two-dimensional array of empty nodes
+
+        # Initialize a two-dimensional list of empty nodes
         self.nodes = [[Node(Square(x, y)) for y in range(size)] for x in range(size)]
         self.connect_nodes()
 
     def connect_nodes(self):
-        """Automatically connects adjacent nodes."""
+        """Automatically connects adjacent nodes to each other."""
         for x in range(self.size):
             for y in range(self.size):
                 node = self.get_node(Square(x, y))
@@ -99,26 +98,27 @@ class Layer:
                     dx = dir.value[0]
                     dy = dir.value[1]
 
-                    # Try to get the node in the given direction
+                    # Try to get the neightbor in the given direction
                     neighbor = self.get_node(Square(x + dx, y + dy))
                     if neighbor:
                         # If one exists, connect it to the current node.
                         node.connect(dir, neighbor)
 
     def add_wall(self, a: Square, b: Square):
-        """Adds a wall between two nodes."""
+        """Adds a wall, e.g. removes the connection between two nodes."""
         node1 = self.get_node(a)
         node2 = self.get_node(b)
-        if node1 and node2:
-            # Remove connectivity in both directions
-            for dir, node in node1.connected_nodes.items():
-                if node == node2:
-                    del node1.connected_nodes[dir]
-                    break
-            for dir, node in node2.connected_nodes.items():
-                if node == node1:
-                    del node2.connected_nodes[dir]
-                    break
+        assert node1 and node2, f"Could not find nodes to connect at {a} and {b}."
+
+        # Remove connectivity in both directions
+        for dir, node in node1.connected_nodes.items():
+            if node == node2:
+                del node1.connected_nodes[dir]
+                break
+        for dir, node in node2.connected_nodes.items():
+            if node == node1:
+                del node2.connected_nodes[dir]
+                break
 
     def get_node(self, s: Square) -> Optional[Node]:
         """Returns the node at the specified square in this layer if it exists
@@ -140,7 +140,7 @@ class Layer:
         cols = []
 
         file_labels = " "
-        # Add file indices
+        # Add rank indices
         for i in range(self.size):
             file_labels += f"{i + 1} "
 
@@ -148,7 +148,7 @@ class Layer:
         cols.append(file_labels)
 
         for x, row in enumerate(self.nodes):
-            # Add rank indices
+            # Add file indices
             horizontal_walls = " "
             col = f"{chr(ord("A") + x)}"
             for y, node in enumerate(row):
@@ -185,19 +185,21 @@ class Level:
         self.size = size
 
     def add_layer(self, layer: Layer, elevation: int):
+        """Adds a layer to the level at the given elevation."""
         if isinstance(self.size, int) and elevation >= self.size:
             raise IndexError(
                 f"Could not add layer to bounded level of size {self.size} at elevation {elevation}"
             )
         else:
+            if elevation in self.layers:
+                raise ValueError(
+                    f"Could not add level at elevation {elevation} because it is occupied."
+                )
             self.layers[elevation] = layer
 
     def get_layer(self, elevation: int) -> Optional[Layer]:
-        try:
-            layer = self.layers[elevation]
-            return layer
-        except KeyError:
-            return None
+        """Returns the layer at the given elevation if it exists and None otherwise."""
+        return self.layers.get(elevation)
 
     def __str__(self) -> str:
         repr = ""

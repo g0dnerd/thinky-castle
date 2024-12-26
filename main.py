@@ -8,8 +8,6 @@ DISPLAY_HEIGHT = 600
 
 
 def layer_test(lvl: Level):
-    ml = Layer(5)
-    lvl.add_layer(ml, 1)
     print(lvl)
 
     layer = lvl.get_layer(1)

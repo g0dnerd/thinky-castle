@@ -14,7 +14,7 @@ def make_level_mesh(lvl: Level):
     colors = []
 
     def add_boundary(layer, e):
-        """Adds boundary vertices and edges for a layer."""
+        """Adds boundary vertices and edges for a layer, e.g. the four bounding walls."""
         size = layer.size
         boundary_vertices = [
             (size, e, -size),
@@ -38,71 +38,56 @@ def make_level_mesh(lvl: Level):
         colors.extend([BOUNDARY_COLOR] * len(boundary_edges))
 
     def add_grid_lines(layer, e):
-        """Adds grid vertices and checks for walls."""
+        """Adds grid vertices and checks for walls between nodes, coloring them accordingly."""
         size = layer.size
+
+        # Add a vertex segment for each node corner
         for x in range(-size, size + GRID_SPACING, GRID_SPACING):
             for z in range(-size, size + GRID_SPACING, GRID_SPACING):
-                if abs(x) == size and abs(z) == size:  # Skip corner vertices
+                if (
+                    abs(x) == size and abs(z) == size
+                ):  # We already added corner vertices
                     continue
+
                 vertices.append((x, e, z))
 
+        # Add an edge between all adjacent vertices
         for a, v1 in enumerate(vertices):
             for b, v2 in enumerate(vertices):
-                if a >= b:  # Avoid redundant checks
-                    continue
-                if (a, b) in edges or (b, a) in edges:  # Skip existing edges
+                if a >= b or (a, b) in edges or (b, a) in edges:  # Skip existing edges
                     continue
 
                 ax, _, az = v1
                 bx, _, bz = v2
 
-                # Check if nodes are adjacent
+                # Check if vertices are adjacent
                 if abs(ax - bx) == GRID_SPACING and az == bz:  # Horizontal adjacency
                     add_wall_or_path(layer, a, b, ax, bx, az, True)
                 elif abs(az - bz) == GRID_SPACING and ax == bx:  # Vertical adjacency
                     add_wall_or_path(layer, a, b, az, bz, ax, False)
 
     def add_wall_or_path(layer, a, b, coord1, coord2, fixed_coord, is_horizontal):
-        """Adds walls or paths between adjacent nodes."""
+        """Adds edges between two adjacent vertices and checks if they are walls or not."""
         size = layer.size
 
-        # If a path lies on the level boundary, it can't be a wall
+        # If a path lies on a level boundary edge, it can't be a wall
         if abs(fixed_coord) == size:
             colors.append(BOUNDARY_COLOR)
             edges.append((a, b))
             return
 
-        # Determine the shared coordinate from the left/upper point of the path
-        match min(coord1, coord2):
-            case -5:
-                fixed = 0
-            case -3:
-                fixed = 1
-            case -1:
-                fixed = 2
-            case 1:
-                fixed = 3
-            case 3:
-                fixed = 4
-            case _:
-                raise ValueError
+        # Determine the shared coordinate from the leftmost/highest point of the path
+        fixed = (min(coord1, coord2) + size) // 2
 
         # Determine the middle coordinate from the shared coordinate of the path
-        match fixed_coord:
-            case -3:
-                mid = 0
-            case -1:
-                mid = 1
-            case 1:
-                mid = 2
-            case 3:
-                mid = 3
-            case _:
-                raise ValueError
+        mid = (fixed_coord + size - GRID_SPACING) // GRID_SPACING
 
+        # If the edge is horizontal, that means the nodes are one vertical space apart
         if is_horizontal:
             sq_a = Square(fixed, mid)
             sq_b = Square(fixed, mid + 1)
+
+        # If the edge is vertical, that means the nodes are one horizontal space apart
         else:
             sq_a = Square(mid, fixed)
             sq_b = Square(mid + 1, fixed)
@@ -115,9 +100,10 @@ def make_level_mesh(lvl: Level):
                 node_b not in node_a.connected_nodes.values()
                 and node_a not in node_b.connected_nodes.values()
             ):
-                colors.append(WALL_COLOR)  # Wall
+                colors.append(WALL_COLOR)
             else:
-                colors.append(PATH_COLOR)  # Path
+                colors.append(PATH_COLOR)
+
             edges.append((a, b))
 
     for e, layer in enumerate(lvl.layers.values()):
