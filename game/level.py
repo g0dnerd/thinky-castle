@@ -137,29 +137,39 @@ class Layer:
 
     def __str__(self) -> str:
         """The most cursed string representation known to man"""
-        # FIXME: this is broken right now because it is iterating vertically first,
-        # which doesn't work
-        repr = "  "
+        cols = []
 
+        file_labels = " "
         # Add file indices
         for i in range(self.size):
-            repr += chr(ord("A") + i) + "   "
-        repr += "\n"
+            file_labels += f"{i + 1} "
 
-        for y, row in enumerate(self.nodes):
+        file_labels = file_labels.removesuffix(" ")
+        cols.append(file_labels)
+
+        for x, row in enumerate(self.nodes):
             # Add rank indices
-            repr += f"{y+1} "
-            horizontal_walls = "  "
-
-            for x, node in enumerate(row):
-                repr += "o" if not node.prop else str(node.prop)
-                if x < self.size - 1:
-                    repr += "   " if node.is_accessible(Direction.RIGHT) else " | "
+            horizontal_walls = " "
+            col = f"{chr(ord("A") + x)}"
+            for y, node in enumerate(row):
+                col += "o" if not node.prop else str(node.prop)
                 if y < self.size - 1:
+                    col += " " if node.is_accessible(Direction.DOWN) else "-"
+                if x < self.size - 1:
                     horizontal_walls += (
-                        "    " if node.is_accessible(Direction.DOWN) else "-   "
+                        "  " if node.is_accessible(Direction.RIGHT) else "| "
                     )
-            repr += f"\n{horizontal_walls}\n"
+
+            col = col.removesuffix(" ")
+            cols.append(col)
+            if horizontal_walls and x < self.size - 1:
+                cols.append(horizontal_walls)
+
+        repr = ""
+        for x in range(self.size * 2):
+            for c in cols:
+                repr += c[x] + " "
+            repr += "\n"
 
         return repr
 
