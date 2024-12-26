@@ -1,40 +1,26 @@
-from game.map import Level
+from game.level import Level
 from typing import List, Tuple
 import pygame
 from OpenGL import GL
 from OpenGL import GLU
 
-from render.convert import prerender_level
-
-colors = [
-    (1, 0, 0),  # red
-    (0, 1, 0),  # green
-    (0, 0, 1),  # blue
-    (0, 1, 0),  # green
-    (1, 1, 1),  # white
-    (0, 1, 1),  # cyan
-    (1, 0, 0),  # red
-    (0, 1, 0),  # green
-    (0, 0, 1),  # blue
-    (1, 0, 0),  # red
-    (1, 1, 1),  # white
-    (0, 1, 1),  # cyan
-]
+from render.mesh import make_level_mesh
 
 
-def rect(
+def render_level(
     vertices: List[Tuple[int, int, int]],
     edges: List[Tuple[int, int]],
+    colors: List[Tuple[int, int, int]],
 ):
     GL.glBegin(GL.GL_LINES)
-    for edge in edges:
+    for i, edge in enumerate(edges):
+        GL.glColor3fv(colors[i])
         for vertex in edge:
             GL.glVertex3fv(vertices[vertex])
     GL.glEnd()
 
 
-def game_loop(display_width: int, display_height: int, level: Level):
-    vertices, edges = prerender_level(level)
+def game_loop(display_width: int, display_height: int, lvl: Level):
     pygame.init()
     display = (display_width, display_height)
     pygame.display.set_mode(display, pygame.DOUBLEBUF | pygame.OPENGL)
@@ -45,15 +31,20 @@ def game_loop(display_width: int, display_height: int, level: Level):
     # Move the camera back
     GL.glTranslatef(0.0, 0.0, -20)
 
-    # Rotate the camera
-    GL.glRotatef(45, 2, 1, 0)
+    # Set initial rotation angles
+    rot_angle = 45
+    rot_x, rot_y = 2, 1
+    GL.glRotatef(rot_angle, rot_x, rot_y, 0)
+
+    # Cache the level's vertices, edges and colors
+    vertices, edges, colors = make_level_mesh(lvl)
 
     while True:
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
                     pygame.quit()
-                    quit()
+                    return
                 case pygame.KEYDOWN:
                     match event.key:
                         case pygame.K_LEFT:
@@ -67,7 +58,7 @@ def game_loop(display_width: int, display_height: int, level: Level):
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-        rect(vertices, edges)
+        render_level(vertices, edges, colors)
 
         pygame.display.flip()
         pygame.time.wait(10)
