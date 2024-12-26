@@ -7,10 +7,10 @@ from game.props import Prop
 class Direction(Enum):
     """Movement directions in the lateral plane"""
 
-    UP = (-1, 0)
-    RIGHT = (0, 1)
-    DOWN = (1, 0)
-    LEFT = (0, -1)
+    UP = (0, -1)
+    DOWN = (0, 1)
+    RIGHT = (1, 0)
+    LEFT = (-1, 0)
 
 
 class Square:
@@ -34,7 +34,7 @@ class Square:
         assert 0 <= rank_idx <= 10, f"Rank {n[0]} is out of bounds."
         assert 0 <= file_idx <= 10, f"File {n[1]} is out of bounds."
 
-        return cls(rank_idx, file_idx)
+        return cls(file_idx, rank_idx)
 
     def __str__(self) -> str:
         return f"{chr(ord('A') + self.x)}{1 + self.y}"
@@ -137,6 +137,8 @@ class Layer:
 
     def __str__(self) -> str:
         """The most cursed string representation known to man"""
+        # FIXME: this is broken right now because it is iterating vertically first,
+        # which doesn't work
         repr = "  "
 
         # Add file indices

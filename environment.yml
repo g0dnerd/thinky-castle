@@ -1,5 +1,13 @@
 name: thinky-castle
 channels:
   - defaults
+  - anaconda
+  - conda-forge
 dependencies:
   - python
+  - pip
+  - anaconda::pyopengl
+  - conda-forge::libffi
+  - conda-forge::libstdcxx-ng
+  - pip:
+      - pygame
